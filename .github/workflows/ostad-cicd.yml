@@ -1,11 +1,40 @@
-deploy:
+name: Node.js CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests and capture results
+        run: npm test > test-results.txt 2>&1 || true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-artifact
+          path: test-results.txt
+
+  deploy:
     needs: test
     runs-on: self-hosted 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # THIS IS THE MISSING STEP: It guarantees 'npm' is found
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -22,7 +51,6 @@ deploy:
       - name: Install production dependencies
         run: npm install --production
 
-      # Ensure pm2 is installed locally for the runner, then deploy
       - name: Deploy application
         run: |
           npm install -g pm2
