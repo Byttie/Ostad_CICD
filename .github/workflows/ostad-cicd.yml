@@ -54,5 +54,5 @@ jobs:
       - name: Deploy application
         run: |
           npm install -g pm2
-          pm2 restart app || pm2 start index.js --name app
+          pm2 restart app || pm2 start npm --name app -- start
           pm2 save
